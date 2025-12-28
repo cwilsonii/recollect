@@ -1,0 +1,51 @@
+{
+  "name": "recollect-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Recollect - Personal URL Bookmarking Service",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint 'src/**/*.ts'",
+    "lint:fix": "eslint 'src/**/*.ts' --fix",
+    "sam:build": "sam build",
+    "sam:deploy": "sam deploy",
+    "sam:local": "sam local start-api",
+    "sam:invoke:save": "sam local invoke SaveUrlFunction -e events/save-url.json",
+    "sam:invoke:get": "sam local invoke GetUrlsFunction -e events/get-urls.json"
+  },
+  "keywords": [
+    "aws",
+    "lambda",
+    "dynamodb",
+    "serverless",
+    "bookmarking"
+  ],
+  "author": "Chuck Wilson",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.478.0",
+    "@aws-sdk/lib-dynamodb": "^3.478.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.130",
+    "@types/jest": "^29.5.11",
+    "@types/node": "^20.10.6",
+    "@types/uuid": "^9.0.7",
+    "@typescript-eslint/eslint-plugin": "^6.17.0",
+    "@typescript-eslint/parser": "^6.17.0",
+    "esbuild": "^0.27.2",
+    "eslint": "^8.56.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

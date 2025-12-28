@@ -1,0 +1,13 @@
+{
+  "httpMethod": "GET",
+  "path": "/api/urls",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-API-Key": "recollect-dev-key-12345"
+  },
+  "queryStringParameters": {
+    "limit": "10"
+  },
+  "body": null,
+  "isBase64Encoded": false
+}

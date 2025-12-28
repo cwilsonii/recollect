@@ -1,0 +1,11 @@
+{
+  "httpMethod": "POST",
+  "path": "/api/urls",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-API-Key": "wrong-api-key"
+  },
+  "queryStringParameters": null,
+  "body": "{\"url\":\"https://example.com\",\"title\":\"Test\"}",
+  "isBase64Encoded": false
+}

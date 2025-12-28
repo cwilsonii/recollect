@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Recollect Icons</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            margin: 10px;
+        }
+        button {
+            background: #8b5cf6;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #7c3aed;
+        }
+        .preview {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Generate Recollect Icons</h1>
+    <p>Click the button below to generate and download extension icons.</p>
+
+    <div class="preview">
+        <canvas id="canvas16" width="16" height="16"></canvas>
+        <canvas id="canvas48" width="48" height="48"></canvas>
+        <canvas id="canvas128" width="128" height="128"></canvas>
+    </div>
+
+    <button onclick="generateIcons()">Generate Icons</button>
+    <button onclick="downloadIcon(16)">Download 16x16</button>
+    <button onclick="downloadIcon(48)">Download 48x48</button>
+    <button onclick="downloadIcon(128)">Download 128x128</button>
+    <button onclick="downloadAllSequential()">Download All (Sequential)</button>
+
+    <p id="status"></p>
+
+    <script>
+        function drawIcon(canvas, size) {
+            const ctx = canvas.getContext('2d');
+
+            // Purple gradient background
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#8b5cf6');
+            gradient.addColorStop(1, '#6366f1');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+
+            // White "R" letter
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `bold ${size * 0.6}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('R', size / 2, size / 2);
+        }
+
+        function generateIcons() {
+            const sizes = [16, 48, 128];
+            sizes.forEach(size => {
+                const canvas = document.getElementById(`canvas${size}`);
+                drawIcon(canvas, size);
+            });
+            document.getElementById('status').textContent = 'Icons generated! Click individual download buttons.';
+        }
+
+        function downloadCanvas(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function downloadIcon(size) {
+            const canvas = document.getElementById(`canvas${size}`);
+            downloadCanvas(canvas, `icon${size}.png`);
+            document.getElementById('status').textContent = `Downloaded icon${size}.png`;
+        }
+
+        async function downloadAllSequential() {
+            const sizes = [16, 48, 128];
+            document.getElementById('status').textContent = 'Downloading...';
+
+            for (let i = 0; i < sizes.length; i++) {
+                const size = sizes[i];
+                const canvas = document.getElementById(`canvas${size}`);
+                downloadCanvas(canvas, `icon${size}.png`);
+                document.getElementById('status').textContent = `Downloaded icon${size}.png (${i + 1}/${sizes.length})`;
+
+                // Wait 500ms between downloads to avoid browser blocking
+                if (i < sizes.length - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                }
+            }
+
+            document.getElementById('status').textContent = 'All icons downloaded! Move them to extension/dist/icons/';
+        }
+
+        // Generate icons on page load
+        window.onload = generateIcons;
+    </script>
+</body>
+</html>

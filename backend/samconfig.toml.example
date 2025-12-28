@@ -1,0 +1,16 @@
+# SAM configuration file
+# Copy this file to samconfig.toml and customize for your deployment
+# This file will be created automatically when you run 'sam deploy --guided'
+
+version = 0.1
+
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "recollect-backend"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-xxxxx"
+s3_prefix = "recollect-backend"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+image_repositories = []

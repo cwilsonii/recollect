@@ -1,0 +1,167 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Recollect Backend - Personal URL Bookmarking Service
+
+Globals:
+  Function:
+    Runtime: nodejs18.x
+    Timeout: 30
+    MemorySize: 256
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref SavedUrlsTable
+        API_KEY: recollect-dev-key-12345
+        NODE_OPTIONS: --enable-source-maps
+    Architectures:
+      - arm64
+
+Resources:
+  # DynamoDB Table for storing saved URLs
+  SavedUrlsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: saved_urls
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: savedAt
+          AttributeType: N
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        - AttributeName: savedAt
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: savedAt-index
+          KeySchema:
+            - AttributeName: savedAt
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+      Tags:
+        - Key: Application
+          Value: Recollect
+        - Key: Environment
+          Value: Production
+
+  # Lambda function for saving URLs
+  SaveUrlFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        EntryPoints:
+          - src/handlers/saveUrl.ts
+        External:
+          - '@aws-sdk/*'
+    Properties:
+      FunctionName: RecollectSaveUrl
+      CodeUri: ./
+      Handler: saveUrl.handler
+      Description: Save a new URL to the database
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref SavedUrlsTable
+      Events:
+        SaveUrlApi:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref RecollectApi
+            Path: /api/urls
+            Method: POST
+      Tags:
+        Application: Recollect
+
+  # Lambda function for retrieving URLs
+  GetUrlsFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        EntryPoints:
+          - src/handlers/getUrls.ts
+        External:
+          - '@aws-sdk/*'
+    Properties:
+      FunctionName: RecollectGetUrls
+      CodeUri: ./
+      Handler: getUrls.handler
+      Description: Retrieve saved URLs with pagination
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref SavedUrlsTable
+      Events:
+        GetUrlsApi:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref RecollectApi
+            Path: /api/urls
+            Method: GET
+      Tags:
+        Application: Recollect
+
+  # HTTP API Gateway
+  RecollectApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: Prod
+      Description: Recollect API for URL bookmarking
+      CorsConfiguration:
+        AllowOrigins:
+          - "*"
+        AllowHeaders:
+          - "Content-Type"
+          - "X-API-Key"
+          - "Authorization"
+        AllowMethods:
+          - GET
+          - POST
+          - OPTIONS
+        MaxAge: 300
+      Tags:
+        Application: Recollect
+
+  # CloudWatch Log Groups for Lambda functions
+  SaveUrlFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${SaveUrlFunction}
+      RetentionInDays: 14
+
+  GetUrlsFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${GetUrlsFunction}
+      RetentionInDays: 14
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway endpoint URL
+    Value: !Sub "https://${RecollectApi}.execute-api.${AWS::Region}.amazonaws.com/Prod"
+    Export:
+      Name: RecollectApiUrl
+
+  SaveUrlFunctionArn:
+    Description: ARN of the SaveUrl Lambda function
+    Value: !GetAtt SaveUrlFunction.Arn
+
+  GetUrlsFunctionArn:
+    Description: ARN of the GetUrls Lambda function
+    Value: !GetAtt GetUrlsFunction.Arn
+
+  DynamoDBTableName:
+    Description: DynamoDB table name
+    Value: !Ref SavedUrlsTable
+
+  Region:
+    Description: AWS Region
+    Value: !Ref AWS::Region

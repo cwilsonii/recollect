@@ -1,0 +1,11 @@
+{
+  "httpMethod": "POST",
+  "path": "/api/urls",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-API-Key": "recollect-dev-key-12345"
+  },
+  "queryStringParameters": null,
+  "body": "{\"url\":\"https://example.com/interesting-article\",\"title\":\"An Interesting Article About Technology\",\"faviconUrl\":\"https://example.com/favicon.ico\"}",
+  "isBase64Encoded": false
+}

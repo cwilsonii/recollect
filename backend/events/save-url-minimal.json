@@ -1,0 +1,11 @@
+{
+  "httpMethod": "POST",
+  "path": "/api/urls",
+  "headers": {
+    "Content-Type": "application/json",
+    "X-API-Key": "recollect-dev-key-12345"
+  },
+  "queryStringParameters": null,
+  "body": "{\"url\":\"https://nodejs.org/en/docs\",\"title\":\"Node.js Documentation\"}",
+  "isBase64Encoded": false
+}
